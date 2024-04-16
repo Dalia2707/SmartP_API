@@ -7,6 +7,7 @@ using MongoDB.Bson;
 
 using MongoDB.Bson.Serialization;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace SmartPlant.Api.Services
 {
@@ -23,10 +24,23 @@ namespace SmartPlant.Api.Services
 
         public async Task<List<User>> GetAsync() =>
             await _UserCollection.Find(_ => true).ToListAsync();
-        
+
+        public async Task<User> GetUser(string emailUser, string password)
+        {
+            var filterDefinition = Builders<User>.Filter.Where(x=>x.EmailUser==emailUser && x.Password==password);
+            return await _UserCollection.FindAsync(filterDefinition).Result.FirstOrDefaultAsync();
+        }
+
+        public async Task<User> GetUser(string emailUser)
+        {
+            var filterDefinition = Builders<User>.Filter.Where(x => x.EmailUser == emailUser);
+            return await _UserCollection.FindAsync(filterDefinition).Result.FirstOrDefaultAsync();
+        }
+
         public async Task InsertUser(User userInsert)
         {
             await _UserCollection.InsertOneAsync(userInsert);
+            string id = userInsert.Id;
         }
 
         public async Task DeleteUser(string userId)

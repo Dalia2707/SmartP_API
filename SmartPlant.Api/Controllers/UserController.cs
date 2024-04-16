@@ -24,22 +24,74 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [HttpGet]
+    [Route("IniciarSesion")]
+    public async Task<IActionResult> IniciarSesion(string correo, string password)
+    {
+        Response<User> _response = new Response<User>();
+
+        try
+        {
+            var usuario = await _userServices.GetUser(correo, password);
+
+            if (usuario != null)
+                _response = new Response<User>() { status = true, msg = "ok", value = usuario };
+            else
+                _response = new Response<User>() { status = false, msg = "no encontrado", value = null };
+
+            return StatusCode(StatusCodes.Status200OK, _response);
+        }
+        catch (Exception ex)
+        {
+            _response = new Response<User>() { status = false, msg = ex.Message, value = null };
+            return StatusCode(StatusCodes.Status500InternalServerError, _response);
+        }
+    }
+
+
     [HttpPost]
     public async Task<IActionResult> InsertUser([FromBody] User userToInsert)
     {
-        if(userToInsert == null)
+        Response<User> _response = new Response<User>();
+        try
         {
-            return BadRequest();
-        }
+            if (userToInsert == null)
+            {
+                return BadRequest();
+            }
 
-        if(userToInsert.NameUser == string.Empty)
+            if (userToInsert.NameUser == string.Empty)
+            {
+                ModelState.AddModelError("Name", "El usuario no debe estar vacio");
+                _response.status = false;
+                _response.msg = "El usuario no debe estar vacio";
+                _response.value = userToInsert;
+            }
+            else
+            {
+                User findUser = await _userServices.GetUser(userToInsert.EmailUser);
+                if (findUser == null)
+                {
+                    await _userServices.InsertUser(userToInsert);
+                    _response.value = userToInsert;
+                    _response.status = true;
+                    _response.msg = "OK";
+                }
+                else {
+                    _response.status = false;
+                    _response.msg = "El usuario ya existe";
+                    _response.value = userToInsert;
+                
+                }
+               
+            }
+
+        } catch (Exception ex)
         {
-            ModelState.AddModelError("Name", "El usuario no debe estar vacio");
+            _response.status = false;
+            _response.msg = ex.Message;
         }
- 
-        await _userServices.InsertUser(userToInsert);
-
-        return Created("Created",true);
+        return Ok(_response);
     }
 
     [HttpDelete("ID")]

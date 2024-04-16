@@ -3,6 +3,7 @@ using SmartPlant.Api.Models;
 using SmartPlant.Api.Services;
 using SmartPlant.Api.Configurations;
 using MongoDB.Bson;
+using System.Collections.Generic;
 
 namespace SmartPlant.Api.Controllers;
 
@@ -23,8 +24,27 @@ public class PlantController : ControllerBase
 
     [HttpGet("Lista")]
     public async Task<IActionResult> GetPlants(){
-        var plants = await _plantServices.GetAsync();
-        return Ok(plants);
+        Response<List<Plant>> _response = new Response<List<Plant>> ();
+
+        try
+        {
+            var plants = await _plantServices.GetAsync();
+
+            if (plants != null)
+                _response = new Response<List<Plant>>() { status = true, msg = "ok", value = plants };
+            else
+                _response = new Response<List<Plant>>() { status = false, msg = "no se encontraron registros", value = null };
+
+            return StatusCode(StatusCodes.Status200OK, _response);
+        }
+        catch (Exception ex)
+        {
+            _response = new Response<List<Plant>>() { status = false, msg = ex.Message, value = null };
+            return StatusCode(StatusCodes.Status500InternalServerError, _response);
+        }
+
+        //var plants = await _plantServices.GetAsync();
+        //return Ok(plants);
     }
 
     [HttpPost("Crear")]

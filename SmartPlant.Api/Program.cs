@@ -17,6 +17,16 @@ builder.Services.AddSingleton<PlantServices>();/////
 builder.Services.AddSingleton<ElectrovalveServices>();/////
 builder.Services.AddSingleton<HumServices>();/////
 builder.Services.AddSingleton<SizeServices>();/////
+builder.Services.AddSingleton<DetallePlantaServices>();/////
+
+builder.Services.AddCors(option => {
+    option.AddPolicy("NuevaPolitica", app => {
+        app.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+
+});
 
 var app = builder.Build();
 
@@ -29,6 +39,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("NuevaPolitica");
 app.UseAuthorization();
 
 app.MapControllers();

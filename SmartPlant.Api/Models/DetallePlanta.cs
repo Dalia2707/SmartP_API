@@ -9,36 +9,32 @@ namespace SmartPlant.Api.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = string.Empty;
 
-        //Planta
+        ////Planta
         [BsonIgnore]
-        public Plant Plant { get; set; }
+        public Plant? Planta { get; set; }
 
-        [BsonElement("Planta")]
+        [BsonElement("Plant")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Planta { get; set; } = string.Empty;
+        public string Plant { get; set; } = string.Empty;
 
         //Humedad
-        [BsonIgnore]
-        public Hum Hum { get; set; }
+        //[BsonIgnore]
+        //public Hum Hum { get; set; }
 
-        [BsonElement("Humedad")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Humedad { get; set; }=string.Empty;
+        [BsonElement("Humidity")]      
+        public double Humidity { get; set; }=0;
 
-        //Tamaño
-        [BsonIgnore]
-        public Size Size { get; set; }
+        ////Tamaño
+        //[BsonIgnore]
+        //public Size Size { get; set; }
 
-        [BsonElement("Tamaño")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Tamaño { get; set; }=string.Empty;
+        //[BsonElement("Tamaño")]
+        //[BsonRepresentation(BsonType.ObjectId)]
+        //public string Tamaño { get; set; }=string.Empty;
 
         //Electrovalvula
-        [BsonIgnore]
-        public Electrovalve Electrovalve { get; set;}
-
-        [BsonElement("Electrovalvula")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Electrovalvula { get; set; } = string.Empty;
+     
+        [BsonElement("Electrovalve")]      
+        public bool Electrovalve { get; set; } = false;
     }
 }
