@@ -4,6 +4,7 @@ using SmartPlant.Api.Services;
 using SmartPlant.Api.Configurations;
 using MongoDB.Bson;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace SmartPlant.Api.Controllers;
 
@@ -13,12 +14,15 @@ public class PlantController : ControllerBase
 {
     private readonly ILogger<PlantController> _logger;
     private readonly PlantServices _plantServices;
+    private readonly DetallePlantaServices _detallePlantaServices;
+
     private readonly UserServices _UserServices;
 
-    public PlantController(ILogger<PlantController> logger, PlantServices plantServices, UserServices userServices)
+    public PlantController(ILogger<PlantController> logger, PlantServices plantServices, DetallePlantaServices detallePlantaService, UserServices userServices)
     {
         _logger = logger;
         _plantServices = plantServices;
+        _detallePlantaServices = detallePlantaService;
         _UserServices = userServices;
     }
 
@@ -78,14 +82,30 @@ public class PlantController : ControllerBase
     [HttpDelete("ID")]
     public async Task<IActionResult> DeletePlant(string id)
     {
-        if(id == null)
-            return BadRequest();
-        if(id == string.Empty)
-            ModelState.AddModelError("Id","No debe dejar el id vacio");
+        Response<Plant> _response = new Response<Plant>();
+        try { 
+            if(id == null)
+                return BadRequest();
+            if(id == string.Empty)
+                ModelState.AddModelError("Id","No debe dejar el id vacio");
+            
+            DetallePlanta dp = await _detallePlantaServices.detalleporIdPlant(id);
+            try
+            {
+                if(dp!=null)
+                await _detallePlantaServices.DeleteDetallePlanta(dp.Id);
+            }catch (Exception ex) { }
 
-        await _plantServices.DeletePlant(id);
+            await _plantServices.DeletePlant(id);
 
-        return Ok();
+            _response = new Response<Plant>() { status = true, msg = "ok", value = null };
+            return StatusCode(StatusCodes.Status200OK, _response);
+        }
+        catch (Exception ex)
+        {
+            _response = new Response<Plant>() { status = false, msg = ex.Message, value = null };
+            return StatusCode(StatusCodes.Status500InternalServerError, _response);
+        }
     }
 
     [HttpPut("PlantToUpdate")]

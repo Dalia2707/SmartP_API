@@ -76,6 +76,12 @@ namespace SmartPlant.Api.Services
         }
 
 
-        
+        public async Task DeleteDetallePlanta(string id)
+        {
+            var filter = Builders<DetallePlanta>.Filter.Eq(s => s.Id, id);
+            await _DetallePlantaCollection.DeleteOneAsync(filter);
+        }
+
+
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.IO;
 using SmartPlant.Api.Models;
 using SmartPlant.Api.Services;
+using Newtonsoft.Json;
 
 namespace SmartPlant.Api.Controllers
 {
@@ -28,11 +30,15 @@ namespace SmartPlant.Api.Controllers
             return Ok(detalleplanta);
         }
 
+
         //Insertar
         [HttpPost("Crear")]
         public async Task<IActionResult> CreateDetallePlanta([FromBody] DetallePlanta detallePlanta)
         {
+          
+
             Response<DetallePlanta> _response = new Response<DetallePlanta>();
+           
 
             try
             {
@@ -47,15 +53,11 @@ namespace SmartPlant.Api.Controllers
             //    ModelState.AddModelError("Planta", "La planta no puede estar Vacia");
             //}
             await _plantaServices.InsertPlant(detallePlanta.Planta);
-            detallePlanta.Plant = detallePlanta.Planta.Id;
+                detallePlanta.Plant = detallePlanta.Planta.Id;
 
             await _detallePlantaServices.InsertarDetallePlant(detallePlanta);
-            detallePlanta = await _detallePlantaServices.DetalleId(detallePlanta.Id);
-           // return Created("Created", detallePlanta);
+                detallePlanta = await _detallePlantaServices.DetalleId(detallePlanta.Id);
 
-
-
-        
                 await _detallePlantaServices.UpdateDetallePlant(detallePlanta);
                 _response = new Response<DetallePlanta>() { status = true, msg = "ok", value = detallePlanta };
 
@@ -128,5 +130,34 @@ namespace SmartPlant.Api.Controllers
             }
 
         }
+
+
+        [Route("GuardarImagen")]
+        [HttpPost]
+        public async Task<IActionResult> GuardarImagen()
+        {
+            Response<string> _response = new Response<string>();
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string filename = "uploads/"+postedFile.FileName;
+                var physicalPath= Path.Combine(Directory.GetCurrentDirectory(), filename);
+               
+                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    await postedFile.CopyToAsync(stream);
+                }
+
+                _response = new Response<string>() { status = true, msg = "ok", value = filename };
+                return StatusCode(StatusCodes.Status200OK, _response);
+            }
+            catch (Exception ex)
+            {
+                _response = new Response<string>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
     }
 }

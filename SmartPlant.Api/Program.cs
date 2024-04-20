@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using SmartPlant.Api.Configurations;
 using SmartPlant.Api.Services;
 
@@ -19,6 +20,8 @@ builder.Services.AddSingleton<HumServices>();/////
 builder.Services.AddSingleton<SizeServices>();/////
 builder.Services.AddSingleton<DetallePlantaServices>();/////
 
+
+
 builder.Services.AddCors(option => {
     option.AddPolicy("NuevaPolitica", app => {
         app.AllowAnyOrigin()
@@ -36,6 +39,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Uploads")),
+    RequestPath = "/Uploads"
+});
 
 app.UseHttpsRedirection();
 

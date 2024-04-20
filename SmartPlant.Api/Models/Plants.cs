@@ -22,6 +22,9 @@ namespace SmartPlant.Api.Models
 
         [BsonIgnore]
         public User? User { get; set; }
+       
+        [BsonElement("ImagenURL")]
+        public string ImagenURL {  get; set; }
 
     }
 }
